@@ -1,0 +1,13 @@
+body {
+  width: 100%;
+}
+
+#App {
+  margin: auto;
+  width: 90%;
+}
+
+#boardContainer {
+  text-align: center;
+  width: 100%;
+}

@@ -1,7 +1,7 @@
 import {
   simpleEvaluationFunction,
   complexEvaluationFunction
-} from "./Intelligence";
+} from "./intelligence";
 
 export interface player {
   computer: boolean;
@@ -13,19 +13,6 @@ export interface searchOptions {
   depth: number;
   evaluationFunction: (board: label[][]) => number;
 }
-
-export const easy: searchOptions = {
-  depth: 1,
-  evaluationFunction: simpleEvaluationFunction
-};
-export const medium: searchOptions = {
-  depth: 3,
-  evaluationFunction: simpleEvaluationFunction
-};
-export const hard: searchOptions = {
-  depth: 5,
-  evaluationFunction: complexEvaluationFunction
-};
 
 export enum label {
   nobody = 0,

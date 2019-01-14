@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Board from "./board";
+import "./index.css";
 import { props, player } from "./interfaces";
 
 class App extends Component<props> {
