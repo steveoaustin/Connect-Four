@@ -10,6 +10,7 @@ export const topInterfaceHeight = 1;
 export const sectionSize = 70;
 export const sectionSpacing = 7;
 export const pieceSize = sectionSize - sectionSpacing;
+export const margin = 5;
 
 export const easy: searchOptions = {
   depth: 1,
