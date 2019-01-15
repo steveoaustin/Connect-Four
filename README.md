@@ -1,3 +1,3 @@
 #Connect Four
 
-(play)[https://steveoaustin.github.io/Connect-Four/]
+[Play](https://steveoaustin.github.io/Connect-Four/)
