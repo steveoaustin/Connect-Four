@@ -1,0 +1,60 @@
+File breakdown
+    -Typescript Files
+        > Types: 
+            - player: 'player1' & 'player2', including color
+            - board: 7 x 6 array of players
+            - search option: depth and evaluation function
+                > encoded values for easy, medium, or hard
+        > Board: HTML5 canvas context. board type
+            - initial drawBoard function (7 width, 6 height)
+            - function to place pieces with animation (takes x coordinate and player)
+                > simply clicking a column will place your piece, mouse onhover will show the piece floating over column
+            - function to declare victor (takes xy coordinates of 'start' and 'end' of the sequence)
+                > animate the line draw for drama
+        > Game: the current gameState, board type
+            - Track current board state 
+            - Check for wins, submit win coords to game
+        > Controller: the options used for the game
+            - toggle between 2 humans, 2 computers, or human vs computer
+                > show/hide relevant controls
+            - configure each computer opponent
+                > evaluation function options (simple, complex, others?)
+                > mini-max depth
+        > Intelligence
+            - mini-max search with alpha-beta pruning
+            - simple and complex evaluation functions 
+        > Visualization
+            - amimated tree search loading area
+            - thought bubble of predicted board state
+            - stretch goal: visulaize boardstates as they 'occur' in minimax
+                > potentially too taxing on graphics
+    - React components
+        > Board and piece input controls
+        > Control panel
+    - GUI
+        > Board centered on top of display
+            - Translucent lines indicate input area for columns
+            - Player indicator above board
+            - during computer's turn:
+                > overlay 'thinking' and a loading wheel under player indicator
+        > Control panel under board
+            - Collapsable
+            - hides irrelevant controls
+            - Control list
+                > Player options
+                    - Human vs human
+                    - Human vs computer
+                    - Computer vs computer
+                > Computer options
+                    - simple
+                        > easy, medium, hard
+                    - Advanced
+                        > minimax search depth (limit to reasonable depth)
+                        > evaluation function (simple, complex, others?)
+        > data visualization under controls
+            - animate tree search algorithm while computer processes
+            - show predicted board state starting form current, rapidly 
+              showing moves over a fixed interval (re-use react componen/animations)
+
+
+

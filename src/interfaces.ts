@@ -1,8 +1,3 @@
-import {
-  simpleEvaluationFunction,
-  complexEvaluationFunction
-} from "./intelligence";
-
 export interface player {
   computer: boolean;
   color: string;
@@ -21,10 +16,8 @@ export enum label {
 }
 
 export interface props {
-  boardProps: {
-    board: label[][];
-    sectionSize: number;
-    player1: player;
-    player2: player;
-  };
+  board: label[][];
+  player1: player;
+  player2: player;
+  turn: number;
 }

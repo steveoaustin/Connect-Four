@@ -1,5 +1,4 @@
 import { label, player, props } from "./interfaces";
-import { defaultSectionSize } from "./constants";
 
 const board: label[][] = [
   [
@@ -59,10 +58,8 @@ const board: label[][] = [
 ];
 
 export const defaultProps: props = {
-  boardProps: {
-    board: board,
-    sectionSize: defaultSectionSize,
-    player1: { computer: false, color: "red" },
-    player2: { computer: false, color: "black" }
-  }
+  board: board,
+  player1: { computer: false, color: "red" },
+  player2: { computer: false, color: "black" },
+  turn: 1
 };

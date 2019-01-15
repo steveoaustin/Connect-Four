@@ -7,9 +7,9 @@ import {
 export const gameWidth = 7;
 export const gameHeight = 6;
 export const topInterfaceHeight = 1;
-export const defaultSectionSize = 50;
-export const sectionSpacing = 5;
-export const pieceSize = defaultSectionSize - sectionSpacing;
+export const sectionSize = 70;
+export const sectionSpacing = 7;
+export const pieceSize = sectionSize - sectionSpacing;
 
 export const easy: searchOptions = {
   depth: 1,
