@@ -12,19 +12,19 @@ self.__precacheManifest = [
     "url": "/Connect-Four/static/js/runtime~main.925710a6.js"
   },
   {
-    "revision": "785ceab67af163efcdc4",
-    "url": "/Connect-Four/static/js/main.785ceab6.chunk.js"
+    "revision": "23fffddb8bea3ad7e8eb",
+    "url": "/Connect-Four/static/js/main.23fffddb.chunk.js"
   },
   {
     "revision": "7f75d124d6dd0f3019bb",
     "url": "/Connect-Four/static/js/1.7f75d124.chunk.js"
   },
   {
-    "revision": "785ceab67af163efcdc4",
+    "revision": "23fffddb8bea3ad7e8eb",
     "url": "/Connect-Four/static/css/main.6fd4c3df.chunk.css"
   },
   {
-    "revision": "04611652dcb601a27207d281485c11d8",
+    "revision": "6be7eb209bf226ac1413d05602f9374f",
     "url": "/Connect-Four/index.html"
   }
 ];
