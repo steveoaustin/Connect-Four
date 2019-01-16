@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { props, label } from "./interfaces";
+import { boardProps, label } from "./interfaces";
 import {
   gameWidth,
   gameHeight,
@@ -11,11 +11,16 @@ import {
 } from "./constants";
 const d3 = require("d3");
 
-export default class Board extends Component<props> {
-  state: props;
-  constructor(props: props) {
+export default class Board extends Component<boardProps> {
+  state: boardProps;
+  constructor(props: boardProps) {
     super(props);
     this.state = { ...props };
+    this.onBoardChange = this.onBoardChange.bind(this);
+  }
+
+  onBoardChange(board: label[][], turn: number) {
+    this.props.onBoardChange(board, turn);
   }
 
   overlayPiece = (event: React.MouseEvent) => {
@@ -25,7 +30,12 @@ export default class Board extends Component<props> {
     }
 
     d3.select("#inputOverlay")
-      .attr("fill", this.state.turn % 2 === 1 ? "red" : "black")
+      .attr(
+        "fill",
+        this.props.turn % 2 === 1
+          ? this.props.player1.color
+          : this.props.player2.color
+      )
       .transition()
       .duration(150)
       .ease(d3.easeElastic)
@@ -35,6 +45,7 @@ export default class Board extends Component<props> {
   };
 
   placePiece = (event: React.MouseEvent) => {
+    console.log(this.props.turn);
     const column = this.getColumn(event);
     if (column >= gameWidth) {
       return; // avoid rendering outside of the board
@@ -42,7 +53,7 @@ export default class Board extends Component<props> {
 
     let row = gameHeight - 1;
     for (let y = 0; y < gameHeight; y++) {
-      if (this.state.board[y][column] != label.nobody) {
+      if (this.props.board[y][column] != label.nobody) {
         row--;
       }
     }
@@ -53,17 +64,19 @@ export default class Board extends Component<props> {
 
     d3.select("#Board")
       .append("circle")
-      .attr("id", "piece" + this.state.turn)
-      .attr("fill", this.state.turn % 2 === 1 ? "red" : "black")
+      .attr("id", "piece" + this.props.turn)
+      .attr("fill", this.props.turn % 2 === 1 ? "red" : "black")
       .attr("cx", column * sectionSize + sectionSize / 2 + margin)
       .attr("cy", sectionSize / 2)
       .attr("r", pieceSize / 2);
 
-    let newBoard = this.state.board;
+    let newBoard = this.props.board;
     newBoard[row][column] =
-      this.state.turn % 2 === 1 ? label.player1 : label.player2;
+      this.props.turn % 2 === 1 ? label.player1 : label.player2;
 
-    d3.select("#piece" + this.state.turn)
+    this.onBoardChange(newBoard, this.props.turn + 1);
+
+    d3.select("#piece" + this.props.turn)
       .transition()
       .duration(150 + 100 * row)
       .ease(d3.easeBounce)
@@ -74,12 +87,10 @@ export default class Board extends Component<props> {
     // swap the color of input overlay to cause "instant" transition
     d3.select("#inputOverlay").attr(
       "fill",
-      (this.state.turn + 1) % 2 === 1 ? "red" : "black"
+      (this.props.turn + 1) % 2 === 1
+        ? this.props.player1.color
+        : this.props.player2.color
     );
-
-    this.setState((state: props) => {
-      return { board: newBoard, turn: state.turn + 1 };
-    });
   };
 
   getColumn = (event: React.MouseEvent) => {
@@ -101,7 +112,7 @@ export default class Board extends Component<props> {
   drawBoard() {
     let currentRow: number = 0;
     let currentColumn: number = 0;
-    const board: label[][] = this.state.board as label[][];
+    const board = this.props.board;
     board.forEach(row => {
       row.forEach(section => {
         let color = "white";
@@ -128,6 +139,10 @@ export default class Board extends Component<props> {
       currentColumn = 0;
       currentRow++;
     });
+  }
+
+  componentDidUpdate() {
+    this.drawBoard();
   }
 
   componentDidMount() {
@@ -168,10 +183,10 @@ export default class Board extends Component<props> {
     return (
       <div id="boardContainer">
         <svg
+          id="Board"
           onPointerMove={this.overlayPiece}
           onMouseOver={this.overlayPiece}
           onClick={this.placePiece}
-          id="Board"
           width={sectionSize * gameWidth + margin * 2}
           height={sectionSize * (gameHeight + topInterfaceHeight) + margin * 2}
         />

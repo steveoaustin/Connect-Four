@@ -21,3 +21,7 @@ export interface props {
   player2: player;
   turn: number;
 }
+
+export interface boardProps extends props {
+  onBoardChange: (board: label[][], turn: number) => void;
+}
