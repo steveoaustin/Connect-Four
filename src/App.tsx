@@ -12,17 +12,26 @@ class App extends Component<props> {
     super(props);
     this.state = { ...props };
     this.onBoardChange = this.onBoardChange.bind(this);
+    this.onWin = this.onWin.bind(this);
   }
 
   onBoardChange(board: label[][], turn: number) {
     this.setState({ board: board, turn: turn });
   }
 
+  onWin(winner: label) {
+    this.setState({ winner: winner });
+  }
+
   render() {
     return (
       <div id="App">
         <Heading {...this.state} />
-        <Board {...this.state} onBoardChange={this.onBoardChange} />
+        <Board
+          {...this.state}
+          onBoardChange={this.onBoardChange}
+          onWin={this.onWin}
+        />
         <div id="Controls" />
         <div id="Vizualization" />
       </div>

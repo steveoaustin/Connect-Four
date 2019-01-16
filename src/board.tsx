@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { boardProps, label } from "./interfaces";
+import { boardProps, label, player } from "./interfaces";
 import {
   gameWidth,
   gameHeight,
@@ -7,23 +7,33 @@ import {
   pieceSize,
   sectionSize,
   sectionSpacing,
-  margin
+  margin,
+  backgroundColor,
+  winSequence
 } from "./constants";
+import { checkWin } from "./intelligence";
+import { line } from "d3";
 const d3 = require("d3");
 
 export default class Board extends Component<boardProps> {
-  state: boardProps;
   constructor(props: boardProps) {
     super(props);
-    this.state = { ...props };
     this.onBoardChange = this.onBoardChange.bind(this);
+    this.onWin = this.onWin.bind(this);
   }
 
   onBoardChange(board: label[][], turn: number) {
     this.props.onBoardChange(board, turn);
   }
 
+  onWin(winner: label) {
+    this.props.onWin(winner);
+  }
+
   overlayPiece = (event: React.MouseEvent) => {
+    if (this.props.winner != label.nobody) {
+      return; // no overlays after win
+    }
     const column = this.getColumn(event);
     if (column >= gameWidth) {
       return; // avoid rendering outside of the board
@@ -45,11 +55,16 @@ export default class Board extends Component<boardProps> {
   };
 
   placePiece = (event: React.MouseEvent) => {
-    console.log(this.props.turn);
+    if (this.props.winner != label.nobody) {
+      return; // can't place pieces after win
+    }
     const column = this.getColumn(event);
     if (column >= gameWidth) {
       return; // avoid rendering outside of the board
     }
+
+    const player =
+      this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
 
     let row = gameHeight - 1;
     for (let y = 0; y < gameHeight; y++) {
@@ -65,16 +80,13 @@ export default class Board extends Component<boardProps> {
     d3.select("#Board")
       .append("circle")
       .attr("id", "piece" + this.props.turn)
-      .attr("fill", this.props.turn % 2 === 1 ? "red" : "black")
+      .attr("fill", player.color)
       .attr("cx", column * sectionSize + sectionSize / 2 + margin)
       .attr("cy", sectionSize / 2)
       .attr("r", pieceSize / 2);
 
     let newBoard = this.props.board;
-    newBoard[row][column] =
-      this.props.turn % 2 === 1 ? label.player1 : label.player2;
-
-    this.onBoardChange(newBoard, this.props.turn + 1);
+    newBoard[row][column] = player.label;
 
     d3.select("#piece" + this.props.turn)
       .transition()
@@ -84,14 +96,76 @@ export default class Board extends Component<boardProps> {
       .attr("cy", row * sectionSize + sectionSize / 2 + sectionSize + margin)
       .attr("r", pieceSize / 2);
 
-    // swap the color of input overlay to cause "instant" transition
-    d3.select("#inputOverlay").attr(
-      "fill",
-      (this.props.turn + 1) % 2 === 1
-        ? this.props.player1.color
-        : this.props.player2.color
-    );
+    this.onBoardChange(newBoard, this.props.turn + 1);
+
+    const winnerCoordinates = checkWin(player.label, newBoard);
+
+    if (winnerCoordinates) {
+      this.onWin(player.label);
+      this.showWinner(winnerCoordinates, player);
+    } else {
+      // swap the color of input overlay to cause "instant" transition
+      d3.select("#inputOverlay").attr(
+        "fill",
+        (this.props.turn + 1) % 2 == 1
+          ? this.props.player1.color
+          : this.props.player2.color
+      );
+    }
   };
+
+  showWinner(
+    coordinates: { x1: number; y1: number; x2: number; y2: number },
+    player: player
+  ) {
+    // hide overlay piece when the game is over
+    d3.select("#inputOverlay").attr("fill", backgroundColor);
+
+    d3.select("#Board")
+      .append("line")
+      .attr("id", "winLineOuter")
+      .attr("stroke-width", "8")
+      .attr("stroke-linecap", "round")
+      .attr("stroke", "black")
+      .attr("x1", this.getPieceXCoordinates(coordinates.x1))
+      .attr("y1", this.getPieceYCoordinates(coordinates.y1))
+      .attr("x2", this.getPieceXCoordinates(coordinates.x1))
+      .attr("y2", this.getPieceYCoordinates(coordinates.y1));
+
+    d3.select("#Board")
+      .append("line")
+      .attr("id", "winLineInner")
+      .attr("stroke-width", "5")
+      .attr("stroke-linecap", "round")
+      .attr("stroke", "white")
+      .attr("x1", this.getPieceXCoordinates(coordinates.x1))
+      .attr("y1", this.getPieceYCoordinates(coordinates.y1))
+      .attr("x2", this.getPieceXCoordinates(coordinates.x1))
+      .attr("y2", this.getPieceYCoordinates(coordinates.y1));
+
+    d3.select("#winLineOuter")
+      .transition()
+      .ease(d3.easeExp)
+      .duration(200 * winSequence)
+      .attr("x2", this.getPieceXCoordinates(coordinates.x2))
+      .attr("y2", this.getPieceYCoordinates(coordinates.y2));
+
+    d3.select("#winLineInner")
+      .transition()
+      .ease(d3.easeExp)
+      .duration(200 * winSequence)
+      .attr("x2", this.getPieceXCoordinates(coordinates.x2))
+      .attr("y2", this.getPieceYCoordinates(coordinates.y2));
+  }
+
+  getPieceXCoordinates(arrayCoordinate: number) {
+    return arrayCoordinate * sectionSize + sectionSize / 2 + margin;
+  }
+  getPieceYCoordinates(arrayCoordinate: number) {
+    return (
+      arrayCoordinate * sectionSize + sectionSize + sectionSize / 2 + margin
+    );
+  }
 
   getColumn = (event: React.MouseEvent) => {
     const boardPosition = document!
@@ -115,34 +189,18 @@ export default class Board extends Component<boardProps> {
     const board = this.props.board;
     board.forEach(row => {
       row.forEach(section => {
-        let color = "white";
-        switch (section) {
-          case label.player1:
-            color = "red";
-            break;
-          case label.player2:
-            color = "black";
-        }
-
         d3.select("#Board")
           .append("circle")
-          .attr("cx", currentColumn * sectionSize + sectionSize / 2 + margin)
-          .attr(
-            "cy",
-            currentRow * sectionSize + sectionSize / 2 + sectionSize + margin
-          )
+          .attr("cx", this.getPieceXCoordinates(currentColumn))
+          .attr("cy", this.getPieceYCoordinates(currentRow))
           .attr("r", pieceSize / 2)
-          .attr("fill", color);
+          .attr("fill", backgroundColor);
 
         currentColumn++;
       });
       currentColumn = 0;
       currentRow++;
     });
-  }
-
-  componentDidUpdate() {
-    this.drawBoard();
   }
 
   componentDidMount() {
@@ -176,7 +234,7 @@ export default class Board extends Component<boardProps> {
       .attr("cx", sectionSize / 2 + margin)
       .attr("cy", sectionSize / 2)
       .attr("r", pieceSize / 2)
-      .attr("fill", "white");
+      .attr("fill", backgroundColor);
   }
 
   render() {
