@@ -59,8 +59,8 @@ const board: label[][] = [
 
 export const defaultProps: props = {
   board: board,
-  player1: { computer: false, label: label.player1, color: "red" },
-  player2: { computer: false, label: label.player2, color: "black" },
+  player1: { computer: false, label: label.player1, color: "green" },
+  player2: { computer: false, label: label.player2, color: "orange" },
   turn: 1,
-  winner: label.nobody
+  winner: false
 };

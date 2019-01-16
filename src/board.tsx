@@ -26,12 +26,12 @@ export default class Board extends Component<boardProps> {
     this.props.onBoardChange(board, turn);
   }
 
-  onWin(winner: label) {
+  onWin(winner: player) {
     this.props.onWin(winner);
   }
 
   overlayPiece = (event: React.MouseEvent) => {
-    if (this.props.winner != label.nobody) {
+    if (this.props.winner) {
       return; // no overlays after win
     }
     const column = this.getColumn(event);
@@ -55,7 +55,7 @@ export default class Board extends Component<boardProps> {
   };
 
   placePiece = (event: React.MouseEvent) => {
-    if (this.props.winner != label.nobody) {
+    if (this.props.winner) {
       return; // can't place pieces after win
     }
     const column = this.getColumn(event);
@@ -80,6 +80,7 @@ export default class Board extends Component<boardProps> {
     d3.select("#Board")
       .append("circle")
       .attr("id", "piece" + this.props.turn)
+      .attr("class", "pieces")
       .attr("fill", player.color)
       .attr("cx", column * sectionSize + sectionSize / 2 + margin)
       .attr("cy", sectionSize / 2)
@@ -101,7 +102,7 @@ export default class Board extends Component<boardProps> {
     const winnerCoordinates = checkWin(player.label, newBoard);
 
     if (winnerCoordinates) {
-      this.onWin(player.label);
+      this.onWin(player);
       this.showWinner(winnerCoordinates, player);
     } else {
       // swap the color of input overlay to cause "instant" transition

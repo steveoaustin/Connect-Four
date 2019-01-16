@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { props, player } from "./interfaces";
+import { props, player, label } from "./interfaces";
 import { gameWidth, sectionSize } from "./constants";
 var d3 = require("d3");
 const computer = require("./resources/computer.png");
@@ -30,14 +30,25 @@ export default class Heading extends Component<props> {
   }
 
   componentDidUpdate() {
-    const turnData = this.getImageAndPlayer();
+    if (this.props.winner) {
+      const image = this.props.winner.computer ? computer : human;
 
-    d3.select("#headingText")
-      .attr("fill", turnData.currentPlayer.color)
-      .text("Player " + turnData.playerNum + "'s turn");
+      d3.select("#headingText")
+        .attr("fill", this.props.winner.color)
+        .text(this.props.winner.label + " Wins!");
 
-    d3.select("#leftImage").attr("xlink:href", turnData.image);
-    d3.select("#rightImage").attr("xlink:href", turnData.image);
+      d3.select("#leftImage").attr("xlink:href", image);
+      d3.select("#rightImage").attr("xlink:href", image);
+    } else {
+      const turnData = this.getImageAndPlayer();
+
+      d3.select("#headingText")
+        .attr("fill", turnData.currentPlayer.color)
+        .text("Player " + turnData.playerNum + "'s turn");
+
+      d3.select("#leftImage").attr("xlink:href", turnData.image);
+      d3.select("#rightImage").attr("xlink:href", turnData.image);
+    }
   }
 
   componentDidMount() {

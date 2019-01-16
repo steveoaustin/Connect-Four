@@ -12,8 +12,8 @@ export interface searchOptions {
 
 export enum label {
   nobody = "nobody",
-  player1 = "player1",
-  player2 = "player2"
+  player1 = "Player 1",
+  player2 = "Player 2"
 }
 
 export interface props {
@@ -21,10 +21,14 @@ export interface props {
   player1: player;
   player2: player;
   turn: number;
-  winner: label;
+  winner: player | false;
+}
+
+export interface controlProps extends props {
+  onChange: (props: props) => void;
 }
 
 export interface boardProps extends props {
   onBoardChange: (board: label[][], turn: number) => void;
-  onWin: (winner: label) => void;
+  onWin: (winner: player) => void;
 }
