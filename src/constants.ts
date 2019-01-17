@@ -14,6 +14,15 @@ export const pieceSize = sectionSize - sectionSpacing;
 export const margin = 5;
 
 export const backgroundColor = "white";
+export const colorChoices = [
+  "red",
+  "orange",
+  "green",
+  "blue",
+  "purple",
+  "pink",
+  "black"
+];
 
 export const easy: searchOptions = {
   depth: 1,

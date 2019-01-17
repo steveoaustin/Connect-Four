@@ -12,13 +12,18 @@ class App extends Component<props> {
   constructor(props: props) {
     super(props);
     this.state = { ...props };
-    this.onControlChange = this.onControlChange.bind(this);
+    this.onPlayer1Change = this.onPlayer1Change.bind(this);
+    this.onPlayer2Change = this.onPlayer2Change.bind(this);
     this.onBoardChange = this.onBoardChange.bind(this);
     this.onWin = this.onWin.bind(this);
   }
 
-  onControlChange(props: props) {
-    this.setState({ props: props });
+  onPlayer1Change(player1: player) {
+    this.setState({ player1: player1 });
+  }
+
+  onPlayer2Change(player2: player) {
+    this.setState({ player2: player2 });
   }
 
   onBoardChange(board: label[][], turn: number) {
@@ -38,7 +43,11 @@ class App extends Component<props> {
           onBoardChange={this.onBoardChange}
           onWin={this.onWin}
         />
-        <Controls {...this.state} onChange={this.onControlChange} />
+        <Controls
+          {...this.state}
+          onPlayer1Change={this.onPlayer1Change}
+          onPlayer2Change={this.onPlayer2Change}
+        />
         <div id="Vizualization" />
       </div>
     );

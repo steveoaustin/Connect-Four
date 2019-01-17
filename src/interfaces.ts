@@ -25,7 +25,8 @@ export interface props {
 }
 
 export interface controlProps extends props {
-  onChange: (props: props) => void;
+  onPlayer1Change: (player1: player) => void;
+  onPlayer2Change: (player2: player) => void;
 }
 
 export interface boardProps extends props {

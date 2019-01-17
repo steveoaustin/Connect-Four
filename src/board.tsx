@@ -204,6 +204,15 @@ export default class Board extends Component<boardProps> {
     });
   }
 
+  componentDidUpdate() {
+    d3.select("#inputOverlay").attr(
+      "fill",
+      this.props.turn % 2 === 1
+        ? this.props.player1.color
+        : this.props.player2.color
+    );
+  }
+
   componentDidMount() {
     d3.select("#Board")
       .append("rect")
