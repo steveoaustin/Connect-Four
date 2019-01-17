@@ -9,44 +9,22 @@ import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 import { controlProps, props, player, label } from "./interfaces";
 import { colorChoices } from "./constants";
+import ColorChoices from "./colorChoices";
 
 const controls1 = "p1Controls";
 const controls2 = "p2Controls";
 const type = "t";
 const color = "c";
 const search = "s";
-let p1Colors = colorChoices;
-let p2Colors = colorChoices;
 
 export default class Controls extends Component<controlProps> {
   constructor(props: controlProps) {
     super(props);
-    this.onPlayer1Change = this.onPlayer1Change.bind(this);
-    this.onPlayer2Change = this.onPlayer2Change.bind(this);
+    this.onPlayerChange = this.onPlayerChange.bind(this);
   }
 
-  manageColors() {
-    p1Colors.filter(color => color != this.props.player2.color);
-    p2Colors.filter(color => color != this.props.player1.color);
-  }
-
-  onPlayer1Change(player1: player) {
-    this.props.onPlayer1Change(player1);
-  }
-
-  onPlayer2Change(player2: player) {
-    this.props.onPlayer2Change(player2);
-  }
-
-  onPlayerColorChange(event: any, id: any) {
-    // which player
-    let player: player = this.props.player1;
-    if (id.indexOf(controls2) != -1) {
-      player = this.props.player2;
-    }
-    player.color = event.target.innerText;
-    if (player.label === label.player1) this.onPlayer1Change(player);
-    else this.onPlayer2Change(player);
+  onPlayerChange(player1: player, player2: player) {
+    this.props.onPlayerChange(player1, player2);
   }
 
   onPlayerTypeChange(event: any) {
@@ -62,45 +40,33 @@ export default class Controls extends Component<controlProps> {
     if (target.value === "human") player.computer = false;
     else player.computer = true;
 
-    if (player.label === label.player1) this.onPlayer1Change(player);
-    else this.onPlayer2Change(player);
+    //this.onPlayerChange(player);
   }
 
-  playerControls(id: string) {
+  playerControls(player: player) {
     return (
-      <div id={id}>
+      <div id={player.label}>
         <form onChange={() => this.onPlayerTypeChange(event)}>
           <ToggleButtonGroup
             bsStyle="primary"
             type="radio"
-            name={id + type}
+            name={player.label + type}
             defaultValue={"human"}
           >
             <ToggleButton value={"human"}>Human</ToggleButton>
             <ToggleButton value={"computer"}>Computer</ToggleButton>
           </ToggleButtonGroup>
-          <Dropdown
-            className={id + color}
-            options={id == controls1 ? p1Colors : p2Colors}
-            onChange={() => this.onPlayerColorChange(event, id)}
-            value={
-              id == controls1
-                ? this.props.player1.color
-                : this.props.player2.color
-            }
-            placeholder="Choose a color"
-          />
+          <ColorChoices {...this.props} player={player} />
         </form>
       </div>
     );
   }
 
   render() {
-    this.manageColors();
     return (
       <div id="controlContainer">
-        {this.playerControls(controls1)}
-        {this.playerControls(controls2)}
+        {this.playerControls(this.props.player1)}
+        {this.playerControls(this.props.player2)}
       </div>
     );
   }

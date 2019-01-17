@@ -1,6 +1,7 @@
 export interface player {
   computer: boolean;
   color: string;
+  colorOptions: string[];
   label: label;
   searchOptions?: searchOptions;
 }
@@ -12,8 +13,8 @@ export interface searchOptions {
 
 export enum label {
   nobody = "nobody",
-  player1 = "Player 1",
-  player2 = "Player 2"
+  player1 = "Player1",
+  player2 = "Player2"
 }
 
 export interface props {
@@ -25,8 +26,11 @@ export interface props {
 }
 
 export interface controlProps extends props {
-  onPlayer1Change: (player1: player) => void;
-  onPlayer2Change: (player2: player) => void;
+  onPlayerChange: (player1: player, player2: player) => void;
+}
+
+export interface colorControlProps extends controlProps {
+  player: player;
 }
 
 export interface boardProps extends props {

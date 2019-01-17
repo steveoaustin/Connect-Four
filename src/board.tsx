@@ -80,7 +80,7 @@ export default class Board extends Component<boardProps> {
     d3.select("#Board")
       .append("circle")
       .attr("id", "piece" + this.props.turn)
-      .attr("class", "pieces")
+      .attr("class", player.label)
       .attr("fill", player.color)
       .attr("cx", column * sectionSize + sectionSize / 2 + margin)
       .attr("cy", sectionSize / 2)
@@ -205,6 +205,17 @@ export default class Board extends Component<boardProps> {
   }
 
   componentDidUpdate() {
+    d3.selectAll("." + this.props.player1.label).attr(
+      "fill",
+      this.props.player1.color
+    );
+    d3.selectAll("." + this.props.player2.label).attr(
+      "fill",
+      this.props.player2.color
+    );
+
+    // hide input overlay after somebody wins
+    if (this.props.winner) return;
     d3.select("#inputOverlay").attr(
       "fill",
       this.props.turn % 2 === 1
