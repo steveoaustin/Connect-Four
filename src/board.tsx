@@ -39,13 +39,16 @@ export default class Board extends Component<boardProps> {
       return; // avoid rendering outside of the board
     }
 
+    const player =
+      this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
+
+    if (player.computer) {
+      d3.select("#inputOverlay").attr("fill", backgroundColor);
+      return; // only humans overlay pieces
+    }
+
     d3.select("#inputOverlay")
-      .attr(
-        "fill",
-        this.props.turn % 2 === 1
-          ? this.props.player1.color
-          : this.props.player2.color
-      )
+      .attr("fill", player.color)
       .transition()
       .duration(150)
       .ease(d3.easeElastic)
@@ -65,6 +68,8 @@ export default class Board extends Component<boardProps> {
 
     const player =
       this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
+
+    if (player.computer) return; // only humans click to place
 
     let row = gameHeight - 1;
     for (let y = 0; y < gameHeight; y++) {
@@ -97,14 +102,15 @@ export default class Board extends Component<boardProps> {
       .attr("cy", row * sectionSize + sectionSize / 2 + sectionSize + margin)
       .attr("r", pieceSize / 2);
 
-    this.onBoardChange(newBoard, this.props.turn + 1);
-
     const winnerCoordinates = checkWin(player.label, newBoard);
 
     if (winnerCoordinates) {
+      // don't increase turn on winner
+      this.onBoardChange(newBoard, this.props.turn);
       this.onWin(player);
       this.showWinner(winnerCoordinates, player);
     } else {
+      this.onBoardChange(newBoard, this.props.turn + 1);
       // swap the color of input overlay to cause "instant" transition
       d3.select("#inputOverlay").attr(
         "fill",
@@ -204,7 +210,17 @@ export default class Board extends Component<boardProps> {
     });
   }
 
+  resetBoard() {
+    d3.selectAll("." + this.props.player1.label).remove();
+    d3.selectAll("." + this.props.player2.label).remove();
+    d3.select("#winLineOuter").remove();
+    d3.select("#winLineInner").remove();
+  }
+
   componentDidUpdate() {
+    if (!this.props.started) {
+      this.resetBoard();
+    }
     d3.selectAll("." + this.props.player1.label).attr(
       "fill",
       this.props.player1.color
@@ -219,7 +235,11 @@ export default class Board extends Component<boardProps> {
     d3.select("#inputOverlay").attr(
       "fill",
       this.props.turn % 2 === 1
-        ? this.props.player1.color
+        ? this.props.player1.computer
+          ? backgroundColor
+          : this.props.player1.color
+        : this.props.player2.computer
+        ? backgroundColor
         : this.props.player2.color
     );
   }

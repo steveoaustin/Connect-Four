@@ -30,18 +30,17 @@ export default class Heading extends Component<props> {
   }
 
   componentDidUpdate() {
+    const turnData = this.getImageAndPlayer();
     if (this.props.winner) {
-      const image = this.props.winner.computer ? computer : human;
+      const image = turnData.image;
 
       d3.select("#headingText")
-        .attr("fill", this.props.winner.color)
+        .attr("fill", turnData.currentPlayer.color)
         .text(this.props.winner.label + " Wins!");
 
       d3.select("#leftImage").attr("xlink:href", image);
       d3.select("#rightImage").attr("xlink:href", image);
     } else {
-      const turnData = this.getImageAndPlayer();
-
       d3.select("#headingText")
         .attr("fill", turnData.currentPlayer.color)
         .text("Player " + turnData.playerNum + "'s turn");

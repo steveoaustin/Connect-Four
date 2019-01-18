@@ -2,13 +2,15 @@ import React, { Component, FormEvent } from "react";
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 import { colorChoices } from "./constants";
-import { colorControlProps, player, label } from "./interfaces";
+import { individualControlProps, player, label } from "./interfaces";
 
-export default class ColorChoices extends Component<colorControlProps> {
-  constructor(props: colorControlProps) {
+export default class ColorChoices extends Component<individualControlProps> {
+  constructor(props: individualControlProps) {
     super(props);
     this.onPlayerChange = this.onPlayerChange.bind(this);
-    this.manageColors({ value: this.props.player.color });
+    this.manageColors({
+      value: this.props.player.color
+    });
   }
 
   onPlayerChange(player1: player, player2: player) {

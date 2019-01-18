@@ -22,14 +22,17 @@ export interface props {
   player1: player;
   player2: player;
   turn: number;
+  started: boolean;
   winner: player | false;
 }
 
 export interface controlProps extends props {
   onPlayerChange: (player1: player, player2: player) => void;
+  onGameStart: () => void;
+  onGameReset: () => void;
 }
 
-export interface colorControlProps extends controlProps {
+export interface individualControlProps extends controlProps {
   player: player;
 }
 

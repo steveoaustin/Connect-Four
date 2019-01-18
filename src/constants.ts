@@ -1,4 +1,4 @@
-import { searchOptions } from "./interfaces";
+import { searchOptions, label } from "./interfaces";
 import {
   simpleEvaluationFunction,
   complexEvaluationFunction
@@ -19,10 +19,23 @@ export const colorChoices = [
   "orange",
   "green",
   "blue",
+  "aqua",
   "purple",
-  "pink",
+  "deepPink",
   "black"
 ];
+
+export const depthOptions = ["1", "2", "3", "4", "5", "6", "7"];
+export const defaultDepth = "3";
+
+export const evalFunctionOptions = ["simple", "complex"];
+export const defaultEval = "simple";
+export const evalFunctionDict: {
+  [name: string]: (board: label[][]) => number;
+} = {
+  simple: simpleEvaluationFunction,
+  complex: complexEvaluationFunction
+};
 
 export const easy: searchOptions = {
   depth: 1,

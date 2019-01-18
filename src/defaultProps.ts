@@ -1,65 +1,19 @@
 import { label, player, props } from "./interfaces";
-import { colorChoices } from "./constants";
+import { colorChoices, gameHeight, gameWidth } from "./constants";
 
-const board: label[][] = [
-  [
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody
-  ],
-  [
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody
-  ],
-  [
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody
-  ],
-  [
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody
-  ],
-  [
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody
-  ],
-  [
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody,
-    label.nobody
-  ]
-];
+export function generateBoard() {
+  let board: label[][] = [];
+  for (let r: number = 0; r < gameHeight; r++) {
+    board[r] = [];
+    for (let c: number = 0; c < gameWidth; c++) {
+      board[r][c] = label.nobody;
+    }
+  }
+  return board;
+}
 
 export const defaultProps: props = {
-  board: board,
+  board: generateBoard(),
   player1: {
     computer: false,
     label: label.player1,
@@ -73,5 +27,6 @@ export const defaultProps: props = {
     colorOptions: colorChoices
   },
   turn: 1,
+  started: false,
   winner: false
 };
