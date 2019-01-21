@@ -8,7 +8,11 @@ export interface player {
 
 export interface searchOptions {
   depth: number;
-  evaluationFunction: (board: label[][]) => number;
+  evaluationFunction: (
+    board: label[][],
+    me: player,
+    opponent: player
+  ) => number;
 }
 
 export enum label {

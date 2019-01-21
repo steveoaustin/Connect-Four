@@ -11,7 +11,7 @@ import {
   backgroundColor,
   winSequence
 } from "./constants";
-import { checkWin } from "./intelligence";
+import { checkWin, getMove } from "./intelligence";
 import { line } from "d3";
 const d3 = require("d3");
 
@@ -57,20 +57,7 @@ export default class Board extends Component<boardProps> {
       .attr("r", pieceSize / 2);
   };
 
-  placePiece = (event: React.MouseEvent) => {
-    if (this.props.winner) {
-      return; // can't place pieces after win
-    }
-    const column = this.getColumn(event);
-    if (column >= gameWidth) {
-      return; // avoid rendering outside of the board
-    }
-
-    const player =
-      this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
-
-    if (player.computer) return; // only humans click to place
-
+  placePiece(column: number, player: player) {
     let row = gameHeight - 1;
     for (let y = 0; y < gameHeight; y++) {
       if (this.props.board[y][column] != label.nobody) {
@@ -93,32 +80,49 @@ export default class Board extends Component<boardProps> {
 
     let newBoard = this.props.board;
     newBoard[row][column] = player.label;
+    // hide overlay until the next turn
+    d3.select("#inputOverlay").attr("fill", backgroundColor);
 
     d3.select("#piece" + this.props.turn)
       .transition()
-      .duration(150 + 100 * row)
+      .duration(400)
       .ease(d3.easeBounce)
       .attr("cx", column * sectionSize + sectionSize / 2 + margin)
       .attr("cy", row * sectionSize + sectionSize / 2 + sectionSize + margin)
-      .attr("r", pieceSize / 2);
+      .attr("r", pieceSize / 2)
+      .on("end", () => {
+        this.piecePlaced(player, newBoard);
+      });
+  }
 
+  piecePlaced(player: player, newBoard: label[][]) {
     const winnerCoordinates = checkWin(player.label, newBoard);
 
     if (winnerCoordinates) {
-      // don't increase turn on winner
-      this.onBoardChange(newBoard, this.props.turn);
       this.onWin(player);
       this.showWinner(winnerCoordinates, player);
+      // don't increase turn on winner
+      this.onBoardChange(newBoard, this.props.turn);
     } else {
       this.onBoardChange(newBoard, this.props.turn + 1);
-      // swap the color of input overlay to cause "instant" transition
-      d3.select("#inputOverlay").attr(
-        "fill",
-        (this.props.turn + 1) % 2 == 1
-          ? this.props.player1.color
-          : this.props.player2.color
-      );
     }
+  }
+
+  clickToPlacePiece = (event: React.MouseEvent) => {
+    if (this.props.winner) {
+      return; // can't place pieces after win
+    }
+    const column = this.getColumn(event);
+    if (column >= gameWidth) {
+      return; // avoid rendering outside of the board
+    }
+
+    const player =
+      this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
+
+    if (player.computer) return; // only humans click to place
+
+    this.placePiece(column, player);
   };
 
   showWinner(
@@ -213,14 +217,16 @@ export default class Board extends Component<boardProps> {
   resetBoard() {
     d3.selectAll("." + this.props.player1.label).remove();
     d3.selectAll("." + this.props.player2.label).remove();
-    d3.select("#winLineOuter").remove();
-    d3.select("#winLineInner").remove();
+    d3.selectAll("#winLineOuter").remove();
+    d3.selectAll("#winLineInner").remove();
   }
 
-  componentDidUpdate() {
+  async componentDidUpdate() {
     if (!this.props.started) {
       this.resetBoard();
+      return;
     }
+
     d3.selectAll("." + this.props.player1.label).attr(
       "fill",
       this.props.player1.color
@@ -230,18 +236,30 @@ export default class Board extends Component<boardProps> {
       this.props.player2.color
     );
 
-    // hide input overlay after somebody wins
     if (this.props.winner) return;
+
+    const player =
+      this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
+
     d3.select("#inputOverlay").attr(
       "fill",
-      this.props.turn % 2 === 1
-        ? this.props.player1.computer
-          ? backgroundColor
-          : this.props.player1.color
-        : this.props.player2.computer
-        ? backgroundColor
-        : this.props.player2.color
+      player.computer ? backgroundColor : player.color
     );
+
+    if (player.computer) {
+      const column = this.computerMove(player);
+      this.placePiece(column, player);
+    }
+  }
+
+  computerMove(player: player) {
+    // get the computer's move
+    const column = getMove(
+      player,
+      player.label === label.player1 ? this.props.player2 : this.props.player1,
+      this.props.board
+    );
+    return column;
   }
 
   componentDidMount() {
@@ -285,7 +303,7 @@ export default class Board extends Component<boardProps> {
           id="Board"
           onPointerMove={this.overlayPiece}
           onMouseOver={this.overlayPiece}
-          onClick={this.placePiece}
+          onClick={this.clickToPlacePiece}
           width={sectionSize * gameWidth + margin * 2}
           height={sectionSize * (gameHeight + topInterfaceHeight) + margin * 2}
         />

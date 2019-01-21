@@ -1,4 +1,4 @@
-import { searchOptions, label } from "./interfaces";
+import { searchOptions, label, player } from "./interfaces";
 import {
   simpleEvaluationFunction,
   complexEvaluationFunction
@@ -25,13 +25,13 @@ export const colorChoices = [
   "black"
 ];
 
-export const depthOptions = ["1", "2", "3", "4", "5", "6", "7"];
-export const defaultDepth = "3";
+export const depthOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+export const defaultDepth = "7";
 
 export const evalFunctionOptions = ["simple", "complex"];
 export const defaultEval = "simple";
 export const evalFunctionDict: {
-  [name: string]: (board: label[][]) => number;
+  [name: string]: (board: label[][], me: player, opponent: player) => number;
 } = {
   simple: simpleEvaluationFunction,
   complex: complexEvaluationFunction

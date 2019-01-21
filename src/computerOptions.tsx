@@ -46,7 +46,7 @@ export default class ComputerOptions extends Component<individualControlProps> {
             <Dropdown
               options={depthOptions}
               onChange={e => this.onDepthChange(e)}
-              value={defaultDepth}
+              value={this.props.player.searchOptions!.depth.toString()}
               placeholder="Search depth"
             />
           </div>
