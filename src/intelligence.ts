@@ -1,32 +1,33 @@
 import { searchOptions, label, player } from "./interfaces";
 import { gameHeight, gameWidth, winSequence } from "./constants";
 
-export function getMove(me: player, opponent: player, board: label[][]) {
-  const moves: number[] = possibleMoves(board);
-  let bestMove: number = 0;
-  let bestMoveValue: number = Number.MIN_SAFE_INTEGER;
-  const options = me.searchOptions;
-  if (!options) {
-    throw Error("getting result for human player");
-  }
-  const depth = options.depth;
-  for (let move in moves) {
-    const successor = applyMove(copyBoard(board), moves[move], me);
-    const value = minV(
-      successor,
-      me,
-      opponent,
-      depth,
-      Number.MIN_SAFE_INTEGER,
-      Number.MAX_SAFE_INTEGER
-    );
-    if (value > bestMoveValue) {
-      bestMoveValue = value;
-      bestMove = moves[move];
+export const getMove = (me: player, opponent: player, board: label[][]) =>
+  new Promise<number>((resolve, reject) => {
+    const moves: number[] = possibleMoves(board);
+    let bestMove: number = 0;
+    let bestMoveValue: number = Number.MIN_SAFE_INTEGER;
+    const options = me.searchOptions;
+    if (!options) {
+      return reject("getting result for human player");
     }
-  }
-  return bestMove;
-}
+    const depth = options.depth;
+    for (let move in moves) {
+      const successor = applyMove(copyBoard(board), moves[move], me);
+      const value = minV(
+        successor,
+        me,
+        opponent,
+        depth,
+        Number.MIN_SAFE_INTEGER,
+        Number.MAX_SAFE_INTEGER
+      );
+      if (value > bestMoveValue) {
+        bestMoveValue = value;
+        bestMove = moves[move];
+      }
+    }
+    return resolve(bestMove);
+  });
 
 function minV(
   board: label[][],

@@ -98,7 +98,7 @@ export default class Controls extends Component<controlProps> {
             Start Game
           </Button>
           <Button
-            disabled={this.props.turn == 1}
+            disabled={this.props.turn == 1 || !this.props.winner}
             onClick={() => this.onGameReset()}
           >
             Reset Game

@@ -14,25 +14,27 @@ import {
 import { checkWin, getMove } from "./intelligence";
 import { line } from "d3";
 const d3 = require("d3");
+let activeTurn: boolean;
 
 export default class Board extends Component<boardProps> {
   constructor(props: boardProps) {
     super(props);
     this.onBoardChange = this.onBoardChange.bind(this);
     this.onWin = this.onWin.bind(this);
+    activeTurn = false;
   }
 
   onBoardChange(board: label[][], turn: number) {
-    this.props.onBoardChange(board, turn);
+    this.props.onBoardChange(board, turn, () => this.makeComputerMove(turn));
   }
 
-  onWin(winner: player) {
-    this.props.onWin(winner);
+  onWin(winner: player, board: label[][]) {
+    this.props.onWin(winner, board);
   }
 
   overlayPiece = (event: React.MouseEvent) => {
-    if (this.props.winner) {
-      return; // no overlays after win
+    if (this.props.winner || activeTurn) {
+      return; // no overlays after win or during animation
     }
     const column = this.getColumn(event);
     if (column >= gameWidth) {
@@ -77,6 +79,7 @@ export default class Board extends Component<boardProps> {
       .attr("cx", column * sectionSize + sectionSize / 2 + margin)
       .attr("cy", sectionSize / 2)
       .attr("r", pieceSize / 2);
+    activeTurn = true;
 
     let newBoard = this.props.board;
     newBoard[row][column] = player.label;
@@ -95,33 +98,44 @@ export default class Board extends Component<boardProps> {
       });
   }
 
+  async makeComputerMove(turn: number) {
+    if (this.props.winner) return;
+    const me =
+      this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
+    if (!me.computer) return;
+    const opponent =
+      me.label === label.player1 ? this.props.player2 : this.props.player1;
+    const column = await getMove(me, opponent, this.props.board);
+    this.placePiece(column, me);
+  }
+
   piecePlaced(player: player, newBoard: label[][]) {
     const winnerCoordinates = checkWin(player.label, newBoard);
 
     if (winnerCoordinates) {
-      this.onWin(player);
+      this.onWin(player, newBoard);
       this.showWinner(winnerCoordinates, player);
-      // don't increase turn on winner
-      this.onBoardChange(newBoard, this.props.turn);
     } else {
       this.onBoardChange(newBoard, this.props.turn + 1);
     }
+    activeTurn = false;
   }
 
   clickToPlacePiece = (event: React.MouseEvent) => {
     if (this.props.winner) {
       return; // can't place pieces after win
     }
+
+    const player =
+      this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
+    if (player.computer) {
+      return; // only humans click to place
+    }
+
     const column = this.getColumn(event);
     if (column >= gameWidth) {
       return; // avoid rendering outside of the board
     }
-
-    const player =
-      this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
-
-    if (player.computer) return; // only humans click to place
-
     this.placePiece(column, player);
   };
 
@@ -225,6 +239,8 @@ export default class Board extends Component<boardProps> {
     if (!this.props.started) {
       this.resetBoard();
       return;
+    } else if (this.props.started && this.props.turn == 1) {
+      this.makeComputerMove(this.props.turn);
     }
 
     d3.selectAll("." + this.props.player1.label).attr(
@@ -245,11 +261,6 @@ export default class Board extends Component<boardProps> {
       "fill",
       player.computer ? backgroundColor : player.color
     );
-
-    if (player.computer) {
-      const column = this.computerMove(player);
-      this.placePiece(column, player);
-    }
   }
 
   computerMove(player: player) {

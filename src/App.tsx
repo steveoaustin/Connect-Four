@@ -24,8 +24,15 @@ class App extends Component<props> {
     this.setState({ player1: player1, player2: player2 });
   }
 
-  onBoardChange(board: label[][], turn: number) {
-    this.setState({ board: board, turn: turn, started: true });
+  onBoardChange(
+    board: label[][],
+    turn: number,
+    callback: (turn: number) => void
+  ) {
+    this.setState(
+      { board: board, turn: turn, started: true },
+      async () => await callback(turn)
+    );
   }
 
   onWin(winner: player) {

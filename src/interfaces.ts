@@ -41,6 +41,10 @@ export interface individualControlProps extends controlProps {
 }
 
 export interface boardProps extends props {
-  onBoardChange: (board: label[][], turn: number) => void;
-  onWin: (winner: player) => void;
+  onBoardChange: (
+    board: label[][],
+    turn: number,
+    callback: (turn: number) => void
+  ) => void;
+  onWin: (winner: player, board: label[][]) => void;
 }

@@ -12,24 +12,7 @@ export default class Heading extends Component<props> {
     super(props);
   }
 
-  getImageAndPlayer() {
-    let playerNum = this.props.turn % 2;
-    let currentPlayer: player;
-    switch (playerNum) {
-      case 1:
-        currentPlayer = this.props.player1;
-        break;
-      default:
-        currentPlayer = this.props.player2;
-        playerNum = 2; // display 2 instead of 0
-    }
-
-    const image = currentPlayer.computer ? computer : human;
-
-    return { currentPlayer: currentPlayer, playerNum: playerNum, image: image };
-  }
-
-  componentDidUpdate() {
+  updateHeading() {
     const turnData = this.getImageAndPlayer();
     if (this.props.winner) {
       const image = turnData.image;
@@ -48,6 +31,28 @@ export default class Heading extends Component<props> {
       d3.select("#leftImage").attr("xlink:href", turnData.image);
       d3.select("#rightImage").attr("xlink:href", turnData.image);
     }
+  }
+
+  getImageAndPlayer() {
+    let playerNum = this.props.turn % 2;
+    let currentPlayer: player;
+    switch (playerNum) {
+      case 1:
+        currentPlayer = this.props.player1;
+        break;
+      default:
+        currentPlayer = this.props.player2;
+        playerNum = 2; // display 2 instead of 0
+    }
+
+    const image = currentPlayer.computer ? computer : human;
+
+    return { currentPlayer: currentPlayer, playerNum: playerNum, image: image };
+  }
+
+  componentDidUpdate() {
+    console.log("updating heading", this.props.turn);
+    this.updateHeading();
   }
 
   componentDidMount() {
