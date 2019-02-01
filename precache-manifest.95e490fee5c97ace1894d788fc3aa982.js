@@ -12,23 +12,23 @@ self.__precacheManifest = [
     "url": "/Connect-Four/static/js/runtime~main.925710a6.js"
   },
   {
-    "revision": "9cb2ff65a11274ee4647",
-    "url": "/Connect-Four/static/js/main.9cb2ff65.chunk.js"
+    "revision": "6095203d75e0f6a104dc",
+    "url": "/Connect-Four/static/js/main.6095203d.chunk.js"
   },
   {
-    "revision": "bbe3f1a766708b1f3055",
-    "url": "/Connect-Four/static/js/1.bbe3f1a7.chunk.js"
+    "revision": "62e322c53d3153a08ebb",
+    "url": "/Connect-Four/static/js/1.62e322c5.chunk.js"
   },
   {
-    "revision": "9cb2ff65a11274ee4647",
-    "url": "/Connect-Four/static/css/main.bb825cc8.chunk.css"
+    "revision": "6095203d75e0f6a104dc",
+    "url": "/Connect-Four/static/css/main.d6c14de4.chunk.css"
   },
   {
-    "revision": "bbe3f1a766708b1f3055",
-    "url": "/Connect-Four/static/css/1.3ebd6ac8.chunk.css"
+    "revision": "62e322c53d3153a08ebb",
+    "url": "/Connect-Four/static/css/1.754ae39d.chunk.css"
   },
   {
-    "revision": "cfd2dfffeeeead0b73bad75a2745c53f",
+    "revision": "b6fb17b439b5913d370c4f3bb80dc160",
     "url": "/Connect-Four/index.html"
   }
 ];
