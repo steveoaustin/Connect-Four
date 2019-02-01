@@ -55,7 +55,7 @@ export default class ComputerOptions extends Component<individualControlProps> {
             <Dropdown
               options={evalFunctionOptions}
               onChange={e => this.onEvalChange(e)}
-              value={defaultEval}
+              value={this.props.player.searchOptions!.evaluationFunction.name}
               placeholder="Evaluation Function"
             />
           </div>

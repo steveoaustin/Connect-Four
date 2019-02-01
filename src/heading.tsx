@@ -51,7 +51,7 @@ export default class Heading extends Component<props> {
   }
 
   componentDidUpdate() {
-    console.log("updating heading", this.props.turn);
+    console.log("updating heading");
     this.updateHeading();
   }
 

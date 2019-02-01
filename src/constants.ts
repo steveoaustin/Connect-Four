@@ -1,8 +1,5 @@
 import { searchOptions, label, player } from "./interfaces";
-import {
-  simpleEvaluationFunction,
-  complexEvaluationFunction
-} from "./intelligence";
+import { Simple, Complex } from "./intelligence";
 
 export const gameWidth = 7;
 export const gameHeight = 6;
@@ -25,27 +22,13 @@ export const colorChoices = [
   "black"
 ];
 
-export const depthOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-export const defaultDepth = "7";
+export const depthOptions = ["1", "2", "3", "4", "5", "6", "7"];
+export const defaultDepth = "6";
 
-export const evalFunctionOptions = ["simple", "complex"];
-export const defaultEval = "simple";
+export const evalFunctionOptions = ["Simple", "Complex"];
+export const defaultEval = "Complex";
 export const evalFunctionDict: {
   [name: string]: (board: label[][], me: player, opponent: player) => number;
-} = {
-  simple: simpleEvaluationFunction,
-  complex: complexEvaluationFunction
-};
+} = { Simple: Simple, Complex: Complex };
 
-export const easy: searchOptions = {
-  depth: 1,
-  evaluationFunction: simpleEvaluationFunction
-};
-export const medium: searchOptions = {
-  depth: 3,
-  evaluationFunction: simpleEvaluationFunction
-};
-export const hard: searchOptions = {
-  depth: 5,
-  evaluationFunction: complexEvaluationFunction
-};
+export const sequencePower = 3;

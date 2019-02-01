@@ -21,6 +21,11 @@ export enum label {
   player2 = "Player2"
 }
 
+export interface coordinates {
+  row: number;
+  column: number;
+}
+
 export interface props {
   board: label[][];
   player1: player;
@@ -41,10 +46,6 @@ export interface individualControlProps extends controlProps {
 }
 
 export interface boardProps extends props {
-  onBoardChange: (
-    board: label[][],
-    turn: number,
-    callback: (turn: number) => void
-  ) => void;
+  onBoardChange: (board: label[][], turn: number, callback: () => void) => void;
   onWin: (winner: player, board: label[][]) => void;
 }

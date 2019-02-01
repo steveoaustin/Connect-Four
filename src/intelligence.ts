@@ -1,33 +1,37 @@
-import { searchOptions, label, player } from "./interfaces";
-import { gameHeight, gameWidth, winSequence } from "./constants";
+import { searchOptions, label, player, coordinates } from "./interfaces";
+import { gameHeight, gameWidth, winSequence, sequencePower } from "./constants";
+import { number } from "prop-types";
+import { generateBoard } from "./defaultProps";
 
-export const getMove = (me: player, opponent: player, board: label[][]) =>
-  new Promise<number>((resolve, reject) => {
-    const moves: number[] = possibleMoves(board);
-    let bestMove: number = 0;
-    let bestMoveValue: number = Number.MIN_SAFE_INTEGER;
-    const options = me.searchOptions;
-    if (!options) {
-      return reject("getting result for human player");
+export function getMove(me: player, opponent: player, board: label[][]) {
+  const moves: number[] = possibleMoves(board);
+  let bestMove: number[] = [];
+  let bestMoveValue: number = Number.MIN_SAFE_INTEGER;
+  const options = me.searchOptions;
+  if (!options) {
+    throw Error("getting move for human");
+  }
+  const depth = options.depth;
+  for (let move in moves) {
+    const successor = applyMove(copyBoard(board), moves[move], me);
+    const value = minV(
+      successor,
+      me,
+      opponent,
+      depth,
+      Number.MIN_SAFE_INTEGER,
+      Number.MAX_SAFE_INTEGER
+    );
+    if (value > bestMoveValue) {
+      bestMoveValue = value;
+      bestMove = [];
+      bestMove.push(moves[move]);
+    } else if (value === bestMoveValue) {
+      bestMove.push(moves[move]);
     }
-    const depth = options.depth;
-    for (let move in moves) {
-      const successor = applyMove(copyBoard(board), moves[move], me);
-      const value = minV(
-        successor,
-        me,
-        opponent,
-        depth,
-        Number.MIN_SAFE_INTEGER,
-        Number.MAX_SAFE_INTEGER
-      );
-      if (value > bestMoveValue) {
-        bestMoveValue = value;
-        bestMove = moves[move];
-      }
-    }
-    return resolve(bestMove);
-  });
+  }
+  return bestMove[Math.floor(bestMove.length * Math.random())];
+}
 
 function minV(
   board: label[][],
@@ -49,10 +53,10 @@ function minV(
     const successor = applyMove(copyBoard(board), moves[move], opponent);
     const maxValue = maxV(successor, me, opponent, depth - 1, alpha, beta);
     value = Math.min(value, maxValue);
-    if (maxValue <= alpha) {
+    beta = Math.min(beta, maxValue);
+    if (beta <= alpha) {
       return maxValue;
     }
-    beta = Math.min(beta, maxValue);
   }
   return value;
 }
@@ -78,15 +82,15 @@ function maxV(
     const successor = applyMove(copyBoard(board), moves[move], me);
     const minValue = minV(successor, me, opponent, depth - 1, alpha, beta);
     value = Math.max(value, minValue);
-    if (value >= beta) {
+    alpha = Math.max(alpha, value);
+    if (alpha >= beta) {
       return value;
     }
-    alpha = Math.max(alpha, value);
   }
   return value;
 }
 
-function terminalState(board: label[][]) {
+export function terminalState(board: label[][]) {
   if (checkWin(label.player1, board) || checkWin(label.player2, board)) {
     return true;
   }
@@ -134,11 +138,7 @@ function copyBoard(board: label[][]) {
   return newBoard;
 }
 
-export function simpleEvaluationFunction(
-  board: label[][],
-  me: player,
-  opponent: player
-) {
+export function Simple(board: label[][], me: player, opponent: player) {
   if (checkWin(me.label, board)) {
     return 1;
   } else if (checkWin(opponent.label, board)) {
@@ -148,12 +148,122 @@ export function simpleEvaluationFunction(
   }
 }
 
-export function complexEvaluationFunction(
-  board: label[][],
-  me: player,
-  opponent: player
-) {
-  return 0;
+export function Complex(board: label[][], me: player, opponent: player) {
+  if (checkWin(me.label, board)) {
+    return Number.MAX_SAFE_INTEGER;
+  } else if (checkWin(opponent.label, board)) {
+    return Number.MIN_SAFE_INTEGER;
+  } else {
+    return potentialSequences(board, me) - potentialSequences(board, opponent);
+  }
+}
+
+function potentialSequences(board: label[][], player: player) {
+  let result = 0;
+  result += checkVertical(board, player);
+  result += checkHorizontal(board, player);
+  result += checkDiagonalDown(board, player);
+  result += checkDiagonalUp(board, player);
+  return result;
+}
+
+function checkVertical(board: label[][], player: player) {
+  let result = 0;
+  for (let c = 0; c < gameWidth; c++) {
+    let sequence = 0;
+    let potentialSequence = 0;
+    for (let r = gameHeight - 1; r >= 0; r--) {
+      if (board[r][c] === player.label) {
+        sequence++;
+        potentialSequence++;
+      } else if (board[r][c] != label.nobody) {
+        sequence = 0; // clear the sequence if it is blocked
+        potentialSequence = 0;
+      } else {
+        potentialSequence++;
+      }
+    }
+    if (potentialSequence >= winSequence) {
+      result += Math.pow(sequence, sequencePower);
+    }
+  }
+  return result;
+}
+
+function checkHorizontal(board: label[][], player: player) {
+  let result = 0;
+  for (let r = 0; r < gameHeight; r++) {
+    let sequence = 0;
+    let potentialSequence = 0;
+    for (let c = 0; c < gameWidth; c++) {
+      if (board[r][c] === player.label) {
+        sequence++;
+        potentialSequence++;
+      } else if (board[r][c] != label.nobody) {
+        if (potentialSequence >= winSequence) {
+          result += Math.pow(sequence, sequencePower);
+        }
+        sequence = 0; // clear the sequence if it is blocked
+        potentialSequence = 0;
+      } else {
+        potentialSequence++;
+      }
+    }
+    if (potentialSequence >= winSequence) {
+      result += Math.pow(sequence, sequencePower);
+    }
+  }
+  return result;
+}
+
+function checkDiagonalDown(board: label[][], player: player) {
+  let result = 0;
+  for (let r = 0; r < gameHeight - winSequence; r++) {
+    for (let c = 0; c < gameWidth - winSequence; c++) {
+      let sequence = 0;
+      let potentialSequence = 0;
+      for (let i = 0; i < winSequence; i++) {
+        if (board[r + i][c + i] == player.label) {
+          sequence++;
+          potentialSequence++;
+        } else if (board[r + i][c + i] != label.nobody) {
+          sequence = 0;
+          potentialSequence = 0;
+        } else {
+          potentialSequence++;
+        }
+      }
+      if (potentialSequence >= winSequence) {
+        result += Math.pow(sequence, sequencePower);
+      }
+    }
+  }
+  return result;
+}
+
+function checkDiagonalUp(board: label[][], player: player) {
+  let result = 0;
+  for (let r = gameHeight - 1; r > winSequence; r--) {
+    for (let c = 0; c < gameWidth - winSequence; c++) {
+      let sequence = 0;
+      let potentialSequence = 0;
+      for (let i = 0; i < winSequence; i++) {
+        if (board[r - i][c + i] == player.label) {
+          sequence++;
+          potentialSequence++;
+        } else if (board[r - i][c + i] != label.nobody) {
+          sequence = 0;
+          potentialSequence = 0;
+        } else {
+          potentialSequence++;
+        }
+      }
+      if (potentialSequence >= winSequence) {
+        result += Math.pow(sequence, sequencePower);
+      }
+    }
+  }
+  return result;
 }
 
 export function checkWin(label: label, board: label[][]) {

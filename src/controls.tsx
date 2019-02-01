@@ -17,6 +17,7 @@ import {
 } from "./constants";
 import ColorChoices from "./colorChoices";
 import ComputerOptions from "./computerOptions";
+import { terminalState } from "./intelligence";
 
 const controls1 = "p1Controls";
 const controls2 = "p2Controls";
@@ -98,7 +99,7 @@ export default class Controls extends Component<controlProps> {
             Start Game
           </Button>
           <Button
-            disabled={this.props.turn == 1 || !this.props.winner}
+            disabled={this.props.turn == 1 || !terminalState(this.props.board)}
             onClick={() => this.onGameReset()}
           >
             Reset Game

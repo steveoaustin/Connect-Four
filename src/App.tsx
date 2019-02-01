@@ -24,14 +24,9 @@ class App extends Component<props> {
     this.setState({ player1: player1, player2: player2 });
   }
 
-  onBoardChange(
-    board: label[][],
-    turn: number,
-    callback: (turn: number) => void
-  ) {
-    this.setState(
-      { board: board, turn: turn, started: true },
-      async () => await callback(turn)
+  onBoardChange(board: label[][], turn: number, callback: () => void) {
+    this.setState({ board: board, turn: turn, started: true }, () =>
+      callback()
     );
   }
 
@@ -55,7 +50,6 @@ class App extends Component<props> {
   render() {
     return (
       <div id="App">
-        <Heading {...this.state} />
         <Board
           {...this.state}
           onBoardChange={this.onBoardChange}

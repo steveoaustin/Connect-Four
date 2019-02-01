@@ -14,6 +14,10 @@ import {
 import { checkWin, getMove } from "./intelligence";
 import { line } from "d3";
 const d3 = require("d3");
+const computer = require("./resources/computer.png");
+const human = require("./resources/human.png");
+const fontSize = 30;
+const imageOffset = 110;
 let activeTurn: boolean;
 
 export default class Board extends Component<boardProps> {
@@ -24,8 +28,21 @@ export default class Board extends Component<boardProps> {
     activeTurn = false;
   }
 
+  computerMove() {
+    const player =
+      this.props.turn % 2 == 1 ? this.props.player1 : this.props.player2;
+    if (!player.computer) return;
+    const column = getMove(
+      player,
+      player.label === label.player1 ? this.props.player2 : this.props.player1,
+      this.props.board
+    );
+    if (column === null) throw Error("next move not calculated");
+    this.placePiece(column, player);
+  }
+
   onBoardChange(board: label[][], turn: number) {
-    this.props.onBoardChange(board, turn, () => this.makeComputerMove(turn));
+    this.props.onBoardChange(board, turn, () => this.computerMove());
   }
 
   onWin(winner: player, board: label[][]) {
@@ -93,20 +110,11 @@ export default class Board extends Component<boardProps> {
       .attr("cx", column * sectionSize + sectionSize / 2 + margin)
       .attr("cy", row * sectionSize + sectionSize / 2 + sectionSize + margin)
       .attr("r", pieceSize / 2)
+      .transition()
+      .duration(100)
       .on("end", () => {
         this.piecePlaced(player, newBoard);
       });
-  }
-
-  async makeComputerMove(turn: number) {
-    if (this.props.winner) return;
-    const me =
-      this.props.turn % 2 === 1 ? this.props.player1 : this.props.player2;
-    if (!me.computer) return;
-    const opponent =
-      me.label === label.player1 ? this.props.player2 : this.props.player1;
-    const column = await getMove(me, opponent, this.props.board);
-    this.placePiece(column, me);
   }
 
   piecePlaced(player: player, newBoard: label[][]) {
@@ -122,8 +130,8 @@ export default class Board extends Component<boardProps> {
   }
 
   clickToPlacePiece = (event: React.MouseEvent) => {
-    if (this.props.winner) {
-      return; // can't place pieces after win
+    if (this.props.winner || activeTurn) {
+      return; // can't place pieces after win or during turn
     }
 
     const player =
@@ -233,14 +241,61 @@ export default class Board extends Component<boardProps> {
     d3.selectAll("." + this.props.player2.label).remove();
     d3.selectAll("#winLineOuter").remove();
     d3.selectAll("#winLineInner").remove();
+    d3.select("#inputOverlay").attr("fill", backgroundColor);
   }
 
-  async componentDidUpdate() {
+  getImageAndPlayer() {
+    let playerNum = this.props.turn % 2;
+    let currentPlayer: player;
+    switch (playerNum) {
+      case 1:
+        currentPlayer = this.props.player1;
+        break;
+      default:
+        currentPlayer = this.props.player2;
+        playerNum = 2; // display 2 instead of 0
+    }
+
+    const image = currentPlayer.computer ? computer : human;
+
+    return { currentPlayer: currentPlayer, playerNum: playerNum, image: image };
+  }
+
+  updateHeading() {
+    const turnData = this.getImageAndPlayer();
+    if (this.props.winner) {
+      const image = turnData.image;
+
+      d3.select("#headingText")
+        .attr("fill", turnData.currentPlayer.color)
+        .text(this.props.winner.label + " Wins!");
+
+      d3.select("#leftImage").attr("xlink:href", image);
+      d3.select("#rightImage").attr("xlink:href", image);
+    } else if (this.props.turn > gameWidth * gameHeight) {
+      d3.select("#headingText")
+        .attr("fill", "SteelBlue")
+        .text("Tie Game");
+
+      d3.select("#leftImage").remove();
+      d3.select("#rightImage").remove();
+    } else {
+      d3.select("#headingText")
+        .attr("fill", turnData.currentPlayer.color)
+        .text("Player " + turnData.playerNum + "'s turn");
+
+      d3.select("#leftImage").attr("xlink:href", turnData.image);
+      d3.select("#rightImage").attr("xlink:href", turnData.image);
+    }
+  }
+
+  componentDidUpdate() {
+    this.updateHeading();
     if (!this.props.started) {
       this.resetBoard();
       return;
-    } else if (this.props.started && this.props.turn == 1) {
-      this.makeComputerMove(this.props.turn);
+    } else if (this.props.turn === 1) {
+      this.computerMove();
     }
 
     d3.selectAll("." + this.props.player1.label).attr(
@@ -261,16 +316,6 @@ export default class Board extends Component<boardProps> {
       "fill",
       player.computer ? backgroundColor : player.color
     );
-  }
-
-  computerMove(player: player) {
-    // get the computer's move
-    const column = getMove(
-      player,
-      player.label === label.player1 ? this.props.player2 : this.props.player1,
-      this.props.board
-    );
-    return column;
   }
 
   componentDidMount() {
@@ -305,11 +350,50 @@ export default class Board extends Component<boardProps> {
       .attr("cy", sectionSize / 2)
       .attr("r", pieceSize / 2)
       .attr("fill", backgroundColor);
+
+    const turnData = this.getImageAndPlayer();
+
+    d3.select("#Heading")
+      .append("text")
+      .attr("id", "headingText")
+      .attr("x", (sectionSize * gameWidth) / 2)
+      .attr("y", sectionSize / 2)
+      .attr("font-family", "sans-serif")
+      .attr("font-size", "30px")
+      .attr("text-anchor", "middle")
+      .attr("alignment-baseline", "middle")
+      .attr("fill", turnData.currentPlayer.color)
+      .text("Player " + turnData.playerNum + "'s turn");
+
+    d3.select("#Heading")
+      .append("svg:image")
+      .attr("id", "leftImage")
+      .attr("xlink:href", turnData.image)
+      .attr("x", imageOffset)
+      .attr("y", sectionSize / 2 - fontSize / 2)
+      .attr("width", fontSize)
+      .attr("height", fontSize);
+
+    d3.select("#Heading")
+      .append("svg:image")
+      .attr("id", "rightImage")
+      .attr("xlink:href", turnData.image)
+      .attr("x", sectionSize * gameWidth - fontSize - imageOffset)
+      .attr("y", sectionSize / 2 - fontSize / 2)
+      .attr("width", fontSize)
+      .attr("height", fontSize);
   }
 
   render() {
     return (
       <div id="boardContainer">
+        <div id="headingContainer">
+          <svg
+            id="Heading"
+            width={sectionSize * gameWidth}
+            height={sectionSize}
+          />
+        </div>
         <svg
           id="Board"
           onPointerMove={this.overlayPiece}
